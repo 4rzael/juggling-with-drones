@@ -1,0 +1,21 @@
+rosservice call /swarm/proxy/trajectory_manager/load_trajectory "drone_id: 0
+payload:
+  tid: 0
+  trajectory_type: 'hover'"
+
+rosservice call /swarm/proxy/trajectory_manager/trajectory/config_vector "drone_id: 0
+payload:
+  tid: 0
+  key: 'position'
+  value: [1.5,1.5,2.5]"
+
+rosservice call /swarm/proxy/trajectory_manager/visualize "drone_id: 0
+payload:
+  tid: 0"
+
+rosservice call /swarm/proxy/trajectory_manager/takeoff "drone_id: 0"
+
+rosservice call /swarm/proxy/trajectory_manager/start_trajectory "drone_id: 0"
+
+rosservice call /swarm/proxy/trajectory_manager/land "drone_id: 0"
+

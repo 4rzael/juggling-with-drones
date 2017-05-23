@@ -1,0 +1,5 @@
+int8 drone_id
+crazyflie_trajectory_manager/TranslateTrajectoryPayload payload
+---
+bool proxy_success
+float64[3] result
