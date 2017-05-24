@@ -33,10 +33,10 @@ def service(func):
 # The real business
 
 class SwarmManager(object):
-	def __init__(self, drones=['crazyflie_0']):
+	def __init__(self):
 		self.manager = PubSubManager('swarm_manager', anonymous=False)
 
-		self.drones = drones
+		self.drones = self.manager.rospy.get_param('~drone_prefixes')
 
 		self.proxy_prefix = '/swarm/proxy/'
 		self.to_proxy_list = [
@@ -65,31 +65,38 @@ class SwarmManager(object):
 			{'name': 'trajectory_manager/translate_trajectory',
 			'from_type': Proxy_TranslateTrajectory, 'to_type': TranslateTrajectory},
 			{'name': 'trajectory_manager/set_trajectory_translation8',
-			'from_type': Proxy_TranslateTrajectory, 'to_type': TranslateTrajectory}
+			'from_type': Proxy_TranslateTrajectory, 'to_type': TranslateTrajectory},
+			{'name': 'emergency',
+			'from_type': Proxy_Empty, 'to_type': Empty}
 			]
 
 		self.proxies = {}
 
 		self._build_proxies()
 
+		print self.proxies
+
 	def _build_proxies(self):
 		for to_proxy in self.to_proxy_list:
 			self.proxies[to_proxy['name']] = [None] * len(self.drones)
 			for drone_idx, drone in enumerate(self.drones):
+				serv_name = drone+'/'+to_proxy['name']
 				try:
-					serv_name = drone+'/'+to_proxy['name']
 					self.manager.rospy.wait_for_service(serv_name, timeout=2)
 					self.proxies[to_proxy['name']][drone_idx] = self.manager.add_client_service(serv_name, to_proxy['to_type'])
 
 				except self.manager.rospy.ROSException:
-					print 'ERROR WHILE LOADING SERVICE FROM DRONE', drone
+					print 'ERROR WHILE LOADING SERVICE', serv_name
 			self.manager.add_server_service(self.proxy_prefix+to_proxy['name'],
 				to_proxy['from_type'], self._create_proxy_callback(to_proxy))
 
 	def _create_proxy_callback(self, proxy_object):
 		@service
 		def cb(req, res):
+			print 'PROXYING', proxy_object['to_type'], 'TO DRONE', req.drone_id
+
 			if req.drone_id not in range(len(self.drones)):
+				print 'PROXY ERROR : DRONE NOT FOUND'
 				proxy_success = False
 			else:
 				proxied_req = proxy_object['to_type']._request_class()
@@ -116,11 +123,11 @@ class SwarmManager(object):
 			except:
 				pass
 
+			print 'PROXY SUCCESS :', res.proxy_success
 			return res
 
 		return cb
 
 if __name__ == '__main__':
-	drones = rospy.get_param('drone_prefixes', ['crazyflie_0'])
-	swarm = SwarmManager(drones)
+	swarm = SwarmManager()
 	rospy.spin()

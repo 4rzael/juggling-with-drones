@@ -88,13 +88,13 @@ class HydraMapper(object):
 		return m
 
 
-	def create_glove(self, position, rotation, velocity, acceleration, buttons, trigger):
+	def create_glove(self, position, rotation, velocity, acceleration, buttons, trigger, joy):
 		glove = GloveInput()
 		glove.position = Vector3(*position)
 		glove.velocity = Vector3(*velocity)
 		glove.acceleration = Vector3(*acceleration)
 		glove.rotation = Quaternion(*rotation)
-		glove.buttons = buttons + [trigger > 0.5]
+		glove.buttons = buttons + [trigger > 0.5] + [joy[1] > 0.75]
 		return glove
 
 	def onHydra(self, hydra_wrapper):
@@ -136,7 +136,7 @@ class HydraMapper(object):
 			self.manager.publish('viz', marker)
 			self.manager.publish('input',
 				self.create_glove(tuple(position), rotation, tuple(velocity), tuple(acceleration),
-							 paddle.buttons, paddle.trigger))
+							 paddle.buttons, paddle.trigger, paddle.joy))
 
 
 if __name__ == '__main__':

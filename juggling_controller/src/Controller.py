@@ -53,12 +53,14 @@ class Controller(object):
 		self.manager.add_client_service(swarm_prefix+'trajectory_manager/set_trajectory_translation',
 			Proxy_TranslateTrajectory)
 
+		self.manager.add_client_service(swarm_prefix+'emergency',
+			Proxy_Empty)
 
 		self.manager.add_subscriber('input', GloveInput, self._on_glove_input)
+		self.selected_drone = int(self.manager.get_param('~controller_id', 0))
 
 		self.last_input = GloveInput()
 		self.flying = False
-		self.selected_drone = 0
 		self.current_trajectory = None
 
 		self.POSSIBLE_TRAJECTORIES = [
@@ -85,7 +87,10 @@ class Controller(object):
 		buttons['takeoff_land_button'] = button_diff[5] 
 		buttons['start_button'] = button_diff[7] # trigger
 		buttons['translate'] = button_diff[6] # l/r 3
-		
+		buttons['emergency'] = button_diff[8] # joystick Y
+
+		if buttons['emergency'] == 1:
+			self._call_service('emergency')
 
 		# land/takeoff
 		if buttons['takeoff_land_button'] == 1:
