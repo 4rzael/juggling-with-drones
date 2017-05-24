@@ -2,7 +2,6 @@ from Trajectory import Trajectory
 from TrajectoryUtils import distance, delete_useless_points
 import time
 import numpy as np
-import matplotlib.pyplot as plt
 from geometry_msgs.msg import Pose, Vector3
 
 def millis():
