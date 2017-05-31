@@ -8,7 +8,7 @@ from ControlModeHover import ControlModeHover
 from ControlModeBTimed import ControlModeBTimed
 from ControlModeCircle import ControlModeCircle
 from ControlModeBall import ControlModeBall
-
+from ControlModeLand import ControlModeLand
 
 import numpy as np
 import rospy
@@ -65,7 +65,7 @@ class Controller(object):
 
 		self.POSSIBLE_TRAJECTORIES = [
 			ControlModeHover,
-			ControlModeBTimed,
+			ControlModeLand,
 			ControlModeCircle,
 			ControlModeBall,
 		]
@@ -95,10 +95,9 @@ class Controller(object):
 		# land/takeoff
 		if buttons['takeoff_land_button'] == 1:
 			if self.flying:
-				self._call_service('trajectory_manager/land')
+				self._do_land()
 			else:
-				self._call_service('trajectory_manager/takeoff')
-			self.flying = not self.flying
+				self._do_takeoff()
 
 		# trajectory selection
 		if 1 in buttons['action_buttons']:
@@ -106,7 +105,7 @@ class Controller(object):
 			trajectory_selected = self.POSSIBLE_TRAJECTORIES[buttons['action_buttons'].index(1)]
 			self._call_service('trajectory_manager/load_trajectory',
 				tid=1, trajectory_type=trajectory_selected.get_name())
-			self.current_trajectory = trajectory_selected(self._call_service)
+			self.current_trajectory = trajectory_selected(self)
 			print 'TRAJECTORY SELECTED :', self.current_trajectory.get_name()
 
 		# trajectory submitting and start
@@ -135,6 +134,17 @@ class Controller(object):
 			self.manager.call_service(self.swarm_prefix+service, drone_id=self.selected_drone, payload=objectview(kwargs))
 		else:
 			self.manager.call_service(self.swarm_prefix+service, drone_id=self.selected_drone)
+
+	def _do_land(self):
+		if self.flying:
+			self._call_service('trajectory_manager/land')
+			self.flying = False
+
+	def _do_takeoff(self):
+		if not self.flying:
+			self._call_service('trajectory_manager/takeoff')
+			self.flying = True
+
 
 
 def vec3_to_tuple(v):

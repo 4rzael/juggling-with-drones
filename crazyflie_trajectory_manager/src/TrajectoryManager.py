@@ -16,6 +16,8 @@ from BSplineTimedTrajectory import BSplineTimedTrajectory
 from GravitationTrajectory import GravitationTrajectory
 from BallLikeTrajectory import BallLikeTrajectory
 from HoverTrajectory import HoverTrajectory
+from LandTrajectory import LandTrajectory
+
 
 def vec3_to_tuple(v):
 	return (v.x, v.y, v.z)
@@ -168,7 +170,7 @@ class TrajectoryManager(object):
 
 			# if there is nothing to do for the drone, make it hover at 1.5 meters from the ground
 			if self.trajectories[0] is None and self.drone_position is not None:
-				self.load_trajectory(HoverTrajectory(), tid=0)
+				self.load_trajectory(HoverTrajectory(manager=self), tid=0)
 				pos = (self.drone_position[0], self.drone_position[1], 1.5)
 				self.trajectory_config(tid=0, position=pos)
 				self.trajectory_start()
@@ -205,11 +207,12 @@ class TrajectoryManager(object):
 			'bspline': BSplineTrajectory,
 			'btimed': BSplineTimedTrajectory,
 			'ball': BallLikeTrajectory,
-			'grav': GravitationTrajectory
+			'grav': GravitationTrajectory,
+			'land_at_pos': LandTrajectory
 		}
 
 		if req.payload.trajectory_type in TRAJS:
-			t = TRAJS[req.payload.trajectory_type]()
+			t = TRAJS[req.payload.trajectory_type](manager=self)
 			print t.items()
 			self.load_trajectory(t, req.payload.tid)
 			res.result = True
@@ -234,7 +237,7 @@ class TrajectoryManager(object):
 	def srv_config_trajectory(self, req, res):
 		print 'CONFIGURING TRAJECTORY', req.payload.tid, req.payload.key, '=', req.payload.value
 
-		if self.trajectories[req.payload.tid]:
+		if self.trajectories[req.payload.tid] is not None:
 			self.trajectory_config(req.payload.tid, **{req.payload.key: req.payload.value})
 			res.result = True
 		else:

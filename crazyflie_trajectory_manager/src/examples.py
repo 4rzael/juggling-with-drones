@@ -31,23 +31,27 @@ if __name__ == '__main__':
 
 	trajectories = {
 		'hover': HoverTrajectory(
-			position=(2,2,2)
+			position=(2,2,2),
+			manager=tm
 		),
 		'bspline': BSplineTrajectory(
 			precision=0.1,
 			key_points=bspline_points,
-			loop=True
+			loop=True,
+			manager=tm
 		),
 		'bspline_time': BSplineTimedTrajectory(
 			2000,
 			precision=0.1,
 			key_points=bspline_points,
-			loop=True
+			loop=True,
+			manager=tm
 		),
 		'ball': BallLikeTrajectory(
 			drone_speed=(2, 0, 4),
 			time_multiplier=0.5,
-			viz_position=(1, 1, 2)
+			viz_position=(1, 1, 2),
+			manager=tm
 		),
 		'grav': GravitationTrajectory(
 			star_position=(1.5, 2, 1),
@@ -55,7 +59,8 @@ if __name__ == '__main__':
 			orbiter_speed=(7350, 0, 0),
 			distance_multiplier=7378*1000,
 			time_multiplier=1000,
-			viz_position=(1.5, 1.25, 1)
+			viz_position=(1.5, 1.25, 1),
+			manager=tm
 		)
 	}
 

@@ -1,5 +1,5 @@
 class Trajectory(object):
-	def __init__(self, **kwargs):
+	def __init__(self, manager, **kwargs):
 		# Public parameters
 		self.values = kwargs
 		# special setters
@@ -8,6 +8,8 @@ class Trajectory(object):
 		self.started = False
 		# trajectory_translation
 		self.translation = (0,0,0)
+
+		self.manager = manager
 
 	# Returns a pose
 	def get_next_pose(self, drone_position):

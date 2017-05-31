@@ -4,9 +4,6 @@ def vec3_to_tuple(v):
 	return (v.x, v.y, v.z)
 
 class ControlModeBall(ControlMode):
-	def __init__(self, *args, **kwargs):
-		super(ControlModeBall, self).__init__(*args, **kwargs)
-
 	@staticmethod
 	def get_name():
 		return 'ball'

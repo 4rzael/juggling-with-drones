@@ -82,7 +82,7 @@ class ControlModeCircle(ControlMode):
 			# circle regression
 
 			try:
-				center_2b, R_2b = fit_circle(transformed, epsilon=0.05)
+				center_2b, R_2b = fit_circle(transformed, epsilon=0.01)
 			except Exception as e:
 
 				print 'Error while fitting a circle :', e

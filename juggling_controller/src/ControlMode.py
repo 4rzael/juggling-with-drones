@@ -1,6 +1,7 @@
 class ControlMode(object):
-	def __init__(self, call_service):
-		self.call_service = call_service
+	def __init__(self, controller):
+		self.controller = controller
+		self.call_service = controller._call_service
 		pass
 
 	# static

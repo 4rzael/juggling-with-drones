@@ -1,5 +1,9 @@
 import math
 from geometry_msgs.msg import Pose, Vector3
+import time
+
+def millis():
+	return int(time.time() * 1000.0)
 
 def tuple3_add(t1, t2):
 	return (

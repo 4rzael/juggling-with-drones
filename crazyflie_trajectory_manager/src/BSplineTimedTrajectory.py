@@ -1,13 +1,8 @@
 from Trajectory import Trajectory
-from TrajectoryUtils import distance, compute_trajectory_distance
+from TrajectoryUtils import distance, compute_trajectory_distance, millis
 from BSplineTrajectory import BSplineTrajectory, _need_compute
 
 from geometry_msgs.msg import Pose, Vector3
-
-import time
-def millis():
-	return int(time.time() * 1000.0)
-
 
 # Public arguments :
 # - See BSplineTrajectory arguments

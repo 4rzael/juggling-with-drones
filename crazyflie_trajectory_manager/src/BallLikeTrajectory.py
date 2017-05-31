@@ -1,12 +1,7 @@
 from Trajectory import Trajectory
-from TrajectoryUtils import delete_useless_points, returns_pose
+from TrajectoryUtils import delete_useless_points, returns_pose, millis
 
 import numpy as np
-
-import time
-def millis():
-	return int(time.time() * 1000.0)
-
 
 # Public arguments :
 # - init_speed : The initial speed : (x, y, z)
