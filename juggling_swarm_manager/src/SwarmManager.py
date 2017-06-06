@@ -20,15 +20,26 @@ def service_response_class_from_request(request_obj):
 	else:
 		return None
 
-def service(func):
-	def wrapper(req):
-		res_class = service_response_class_from_request(req)
-		if res_class is None:
-			return func(req, None)
+def service(self=False):
+	def service_decorator(func):
+		if self is False:
+			def wrapper(req):
+				res_class = service_response_class_from_request(req)
+				if res_class is None:
+					return func(req, None)
+				else:
+					res = res_class()
+					return func(req, res)
 		else:
-			res = res_class()
-			return func(req, res)
-	return wrapper
+			def wrapper(_self, req):
+				res_class = service_response_class_from_request(req)
+				if res_class is None:
+					return func(_self, req, None)
+				else:
+					res = res_class()
+					return func(_self, req, res)
+		return wrapper
+	return service_decorator
 
 # The real business
 
@@ -36,7 +47,8 @@ class SwarmManager(object):
 	def __init__(self):
 		self.manager = PubSubManager('swarm_manager', anonymous=False)
 
-		self.drones = self.manager.rospy.get_param('~drone_prefixes')
+		self.nb_drones = int(self.manager.rospy.get_param('~nb_drones', default='2'))
+		self.drones = self.manager.rospy.get_param('~drone_prefixes')[:self.nb_drones]
 		bases = self.manager.rospy.get_param('~bases', [])
 		self.bases = [None] * len(self.drones)
 		try:
@@ -104,7 +116,7 @@ class SwarmManager(object):
 				to_proxy['from_type'], self._create_proxy_callback(to_proxy))
 
 	def _create_proxy_callback(self, proxy_object):
-		@service
+		@service()
 		def cb(req, res):
 			print 'PROXYING', proxy_object['to_type'], 'TO DRONE', req.drone_id
 
@@ -140,6 +152,13 @@ class SwarmManager(object):
 			return res
 
 		return cb
+
+	# @service(self=True)
+	# def srv_land_at_base(self, req, res):
+	# 	if req.drone_id not in range(len(self.drones)):
+	# 		print 'ERROR : DRONE NOT FOUND'
+	# 	else:
+			
 
 if __name__ == '__main__':
 	swarm = SwarmManager()

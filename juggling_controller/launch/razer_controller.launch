@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="namespace_input_manager" default="input_manager"/>
+  <arg name="input_id" default="0"/>
+  <arg name="controller_id" default="0"/>
+  <arg name="nb_drones" default="2"/>
+
+  <group ns="$(arg namespace_input_manager)">
+  <node pkg="juggling_controller" type="HydraMapper.py" name="hydra_mapper">
+    <param name="input_id" value="$(arg input_id)"/>
+  </node>
+
+  <node pkg="juggling_controller" type="Controller.py" name="controller">
+    <param name="controller_id" value="$(arg controller_id)"/>
+    <param name="nb_drones" value="$(arg nb_drones)"/>
+  </node>
+  </group>
+</launch>
