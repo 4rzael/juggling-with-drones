@@ -57,7 +57,8 @@ class Controller(object):
 			Proxy_Empty)
 
 		self.manager.add_subscriber('input', GloveInput, self._on_glove_input)
-		self.selected_drone = int(self.manager.get_param('~controller_id', 0))
+		self.nb_drones = int(self.manager.get_param('~nb_drones', 2))
+		self.selected_drone = min(int(self.manager.get_param('~controller_id', 0)), self.nb_drones)
 
 		self.last_input = GloveInput()
 		self.flying = False
@@ -75,8 +76,6 @@ class Controller(object):
 	def _on_glove_input(self, input_wrapper):
 		glove = input_wrapper['data']
 
-		self.manager.rospy.logdebug(glove)
-
 		# compute differences from buttons
 		button_diff = [int(_a) - int(_b) for _a,_b in zip(glove.buttons, self.last_input.buttons)]
 
@@ -87,7 +86,17 @@ class Controller(object):
 		buttons['takeoff_land_button'] = button_diff[5] 
 		buttons['start_button'] = button_diff[7] # trigger
 		buttons['translate'] = button_diff[6] # l/r 3
-		buttons['emergency'] = button_diff[8] # joystick Y
+		buttons['emergency'] = button_diff[8] # joystick up
+		buttons['prev_drone'] = button_diff[9] # joystick left
+		buttons['next_drone'] = button_diff[10] # joystick right
+
+		if buttons['prev_drone'] == 1:
+			self._prev_drone()
+
+		if buttons['next_drone'] == 1:
+			self._next_drone()
+
+		print 'SELECTED DRONE :', self.selected_drone
 
 		if buttons['emergency'] == 1:
 			self._call_service('emergency')
@@ -129,7 +138,6 @@ class Controller(object):
 
 
 	def _call_service(self, service, **kwargs):
-
 		if len(kwargs.keys()) > 0:
 			self.manager.call_service(self.swarm_prefix+service, drone_id=self.selected_drone, payload=objectview(kwargs))
 		else:
@@ -144,6 +152,12 @@ class Controller(object):
 		if not self.flying:
 			self._call_service('trajectory_manager/takeoff')
 			self.flying = True
+
+	def _prev_drone(self):
+		self.selected_drone = (self.selected_drone + self.nb_drones - 1) % self.nb_drones
+
+	def _next_drone(self):
+		self.selected_drone = (self.selected_drone + 1) % self.nb_drones
 
 
 

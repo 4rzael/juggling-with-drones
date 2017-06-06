@@ -37,6 +37,13 @@ class SwarmManager(object):
 		self.manager = PubSubManager('swarm_manager', anonymous=False)
 
 		self.drones = self.manager.rospy.get_param('~drone_prefixes')
+		bases = self.manager.rospy.get_param('~bases', [])
+		self.bases = [None] * len(self.drones)
+		try:
+			for i,b in enumerate(bases):
+				self.bases[i] = b
+		except:
+			print 'Cannot read bases'
 
 		self.proxy_prefix = '/swarm/proxy/'
 		self.to_proxy_list = [
@@ -76,17 +83,23 @@ class SwarmManager(object):
 
 		print self.proxies
 
+		# self.manager.add_server_service('land_at_base', Proxy_Empty, self.srv_land_at_base)
+
+	def _add_client_service(self, s_name, s_type):
+		srvs = [None] * len(self.drones)
+		for drone_idx, drone in enumerate(self.drones):
+			serv_name = drone+'/'+s_name
+			try:
+				self.manager.rospy.wait_for_service(serv_name, timeout=2)
+				srvs[drone_idx] = self.manager.add_client_service(serv_name, s_type)
+
+			except self.manager.rospy.ROSException:
+				print 'ERROR WHILE LOADING SERVICE', serv_name
+		return srvs
+
 	def _build_proxies(self):
 		for to_proxy in self.to_proxy_list:
-			self.proxies[to_proxy['name']] = [None] * len(self.drones)
-			for drone_idx, drone in enumerate(self.drones):
-				serv_name = drone+'/'+to_proxy['name']
-				try:
-					self.manager.rospy.wait_for_service(serv_name, timeout=2)
-					self.proxies[to_proxy['name']][drone_idx] = self.manager.add_client_service(serv_name, to_proxy['to_type'])
-
-				except self.manager.rospy.ROSException:
-					print 'ERROR WHILE LOADING SERVICE', serv_name
+			self.proxies[to_proxy['name']] = self._add_client_service(to_proxy['name'], to_proxy['to_type'])
 			self.manager.add_server_service(self.proxy_prefix+to_proxy['name'],
 				to_proxy['from_type'], self._create_proxy_callback(to_proxy))
 

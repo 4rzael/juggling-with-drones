@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="uri0" default="radio://0/80/250K/E7E7E7E701"/>
-  <arg name="uri1" default="radio://0/80/250K/E7E7E7E702"/>
-  <arg name="uri2" default="radio://0/80/250K/E7E7E7E703"/>
-  <arg name="uri3" default="radio://0/80/250K/E7E7E7E704"/>
-  <arg name="uri4" default="radio://0/80/250K/E7E7E7E705"/>
+  <arg name="nb_drones" default="2"/>
+
+  <arg name="uri0" default="radio://0/80/2M/E7E7E7E701"/>
+  <arg name="uri1" default="radio://0/80/2M/E7E7E7E702"/>
+  <arg name="uri2" default="radio://0/80/2M/E7E7E7E703"/>
+  <arg name="uri3" default="radio://0/80/2M/E7E7E7E704"/>
+  <arg name="uri4" default="radio://0/80/2M/E7E7E7E705"/>
 
   <arg name="namespace_input_manager_0" default="input_manager_0"/>
   <arg name="namespace_input_manager_1" default="input_manager_1"/>
@@ -13,6 +15,7 @@
 
   <arg name="namespace_crazyflie_0" default="crazyflie_0"/>
   <arg name="namespace_crazyflie_1" default="crazyflie_1"/>
+  <arg name="namespace_crazyflie_2" default="crazyflie_2"/>
 
   <arg name="frame" default="base_link" />
 
@@ -38,6 +41,7 @@
 
     <node pkg="juggling_controller" type="Controller.py" name="controller">
       <param name="controller_id" value="0"/>
+      <param name="nb_drones" value="$(arg nb_drones)"/>
     </node>
   </group>
 
@@ -49,12 +53,13 @@
 
     <node pkg="juggling_controller" type="Controller.py" name="controller">
       <param name="controller_id" value="1"/>
+      <param name="nb_drones" value="$(arg nb_drones)"/>
     </node>
   </group>
 
 
     <node pkg="juggling_swarm_manager" type="SwarmManager.py" name="swarm_manager">
-      <rosparam param="drone_prefixes" subst_value="True"> [$(arg namespace_crazyflie_0), $(arg namespace_crazyflie_1)] </rosparam>
+      <rosparam param="drone_prefixes" subst_value="True"> [$(arg namespace_crazyflie_0), $(arg namespace_crazyflie_1), $(arg namespace_crazyflie_2)] </rosparam>
     </node>
 
 
@@ -92,6 +97,34 @@
     <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
       <param name="uri" value="$(arg uri1)" />
       <param name="tf_prefix" value="$(arg namespace_crazyflie_1)" />
+      <rosparam>
+        genericLogTopics: ["log_kfpos", "log_kfqt", "log_ranges"]
+        genericLogTopicFrequencies: [30, 30, 30]
+        genericLogTopic_log_kfpos_Variables: ["kalman.stateX", "kalman.stateY", "kalman.stateZ"]
+        genericLogTopic_log_kfqt_Variables: ["kalman.q0", "kalman.q1", "kalman.q2", "kalman.q3"]
+        genericLogTopic_log_ranges_Variables: ["ranging.distance0", "ranging.distance1", "ranging.distance2", "ranging.distance3", "ranging.distance4", "ranging.distance5", "ranging.state"]
+      </rosparam>
+    </node>
+
+    <node pkg="crazyflie_trajectory_manager" type="examples.py" name="trajectory_manager">
+    </node>
+
+    <node name="controller_bridge" pkg="bitcraze_lps_estimator" type="crazyflie_controller_bridge.py" output="screen"/>
+
+    <node name="lps_efk_bridge" pkg="bitcraze_lps_estimator" type="lps_ekf_bridge.py" output="screen"/>
+
+    <node name="lps_viz" pkg="bitcraze_lps_estimator" type="lps_viz.py" />
+
+    <node name="log_range" pkg="bitcraze_lps_estimator" type="log_range.py" />
+
+  </group>
+
+  <group ns="$(arg namespace_crazyflie_2)">
+    <rosparam command="load" file="$(find bitcraze_lps_estimator)/data/anchor_pos.yaml" />
+
+    <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
+      <param name="uri" value="$(arg uri2)" />
+      <param name="tf_prefix" value="$(arg namespace_crazyflie_2)" />
       <rosparam>
         genericLogTopics: ["log_kfpos", "log_kfqt", "log_ranges"]
         genericLogTopicFrequencies: [30, 30, 30]

@@ -94,7 +94,7 @@ class HydraMapper(object):
 		glove.velocity = Vector3(*velocity)
 		glove.acceleration = Vector3(*acceleration)
 		glove.rotation = Quaternion(*rotation)
-		glove.buttons = buttons + [trigger > 0.5] + [joy[1] > 0.75]
+		glove.buttons = buttons + [trigger > 0.5] + [joy[1] > 0.75] + [joy[0] < -0.75] + [joy[0] > 0.75]
 		return glove
 
 	def onHydra(self, hydra_wrapper):
