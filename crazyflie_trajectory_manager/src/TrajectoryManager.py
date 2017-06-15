@@ -17,6 +17,7 @@ from GravitationTrajectory import GravitationTrajectory
 from BallLikeTrajectory import BallLikeTrajectory
 from HoverTrajectory import HoverTrajectory
 from LandTrajectory import LandTrajectory
+from Juggle3DTrajectory import Juggle3DTrajectory
 
 
 def vec3_to_tuple(v):
@@ -61,6 +62,8 @@ class TrajectoryManager(object):
 				TranslateTrajectory, self.srv_translate_trajectory)
 			self.manager.add_server_service('trajectory_manager/set_trajectory_translation',
 				TranslateTrajectory, self.srv_set_trajectory_translation)
+
+			self.manager.add_server_service('ready', Empty, self.srv_nop)
 
 
 		except Exception as e:
@@ -208,7 +211,8 @@ class TrajectoryManager(object):
 			'btimed': BSplineTimedTrajectory,
 			'ball': BallLikeTrajectory,
 			'grav': GravitationTrajectory,
-			'land_at_pos': LandTrajectory
+			'land_at_pos': LandTrajectory,
+			'juggle3D': Juggle3DTrajectory
 		}
 
 		if req.payload.trajectory_type in TRAJS:
@@ -289,3 +293,6 @@ class TrajectoryManager(object):
 		res.result = t
 		return res
 
+	@service
+	def srv_nop(self, req, res):
+		return res

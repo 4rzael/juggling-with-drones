@@ -9,6 +9,7 @@ from ControlModeBTimed import ControlModeBTimed
 from ControlModeCircle import ControlModeCircle
 from ControlModeBall import ControlModeBall
 from ControlModeLand import ControlModeLand
+from ControlModeJuggle3D import ControlModeJuggle3D
 
 import numpy as np
 import rospy
@@ -21,7 +22,25 @@ class Controller(object):
 	def __init__(self, swarm_prefix='/swarm/proxy/'):
 		self.swarm_prefix = swarm_prefix
 
+
+		self.last_input = GloveInput()
+		self.flying = False
+		self.current_trajectory = None
+
+		self.POSSIBLE_TRAJECTORIES = [
+			ControlModeHover,
+			ControlModeJuggle3D,
+			ControlModeCircle,
+			ControlModeBTimed,
+		]
+
+		self.ball_first_pos_nparr = None
+
+
 		self.manager = PubSubManager('juggling_controller', anonymous=False, log_level=rospy.DEBUG)
+
+		self.nb_drones = int(self.manager.get_param('~nb_drones', 2))
+		self.selected_drone = min(int(self.manager.get_param('~controller_id', 0)), self.nb_drones - 1)
 
 		self.manager.add_client_service(swarm_prefix+'trajectory_manager/load_trajectory',
 			Proxy_LoadTrajectory)
@@ -57,21 +76,6 @@ class Controller(object):
 			Proxy_Empty)
 
 		self.manager.add_subscriber('input', GloveInput, self._on_glove_input)
-		self.nb_drones = int(self.manager.get_param('~nb_drones', 2))
-		self.selected_drone = min(int(self.manager.get_param('~controller_id', 0)), self.nb_drones)
-
-		self.last_input = GloveInput()
-		self.flying = False
-		self.current_trajectory = None
-
-		self.POSSIBLE_TRAJECTORIES = [
-			ControlModeHover,
-			ControlModeLand,
-			ControlModeCircle,
-			ControlModeBall,
-		]
-
-		self.ball_first_pos_nparr = None
 
 	def _on_glove_input(self, input_wrapper):
 		glove = input_wrapper['data']
@@ -92,11 +96,11 @@ class Controller(object):
 
 		if buttons['prev_drone'] == 1:
 			self._prev_drone()
+			print 'SELECTED DRONE :', self.selected_drone
 
 		if buttons['next_drone'] == 1:
 			self._next_drone()
-
-		print 'SELECTED DRONE :', self.selected_drone
+			print 'SELECTED DRONE :', self.selected_drone
 
 		if buttons['emergency'] == 1:
 			self._call_service('emergency')
@@ -112,18 +116,14 @@ class Controller(object):
 		if 1 in buttons['action_buttons']:
 			print 'TRAJECTORY SELECTION'
 			trajectory_selected = self.POSSIBLE_TRAJECTORIES[buttons['action_buttons'].index(1)]
-			self._call_service('trajectory_manager/load_trajectory',
+			print self._call_service('trajectory_manager/load_trajectory',
 				tid=1, trajectory_type=trajectory_selected.get_name())
 			self.current_trajectory = trajectory_selected(self)
 			print 'TRAJECTORY SELECTED :', self.current_trajectory.get_name()
 
 		# trajectory submitting and start
 		if buttons['start_button'] == 1:
-			self._call_service('trajectory_manager/next_trajectory')
-			self._call_service('trajectory_manager/start_trajectory')
-			self.current_trajectory = None
-
-			self.ball_first_pos_nparr = None
+			self._next_trajectory()
 
 		if buttons['translate'] == -1:
 			vel = vec3_to_tuple(glove.velocity)
@@ -137,11 +137,22 @@ class Controller(object):
 		self.last_input = glove
 
 
+	def _next_trajectory(self):
+		self._call_service('trajectory_manager/next_trajectory')
+		self._call_service('trajectory_manager/start_trajectory')
+		self.current_trajectory = None
+
+		self.ball_first_pos_nparr = None
+
+
 	def _call_service(self, service, **kwargs):
+		print 'CALLING SERVICE', service, kwargs
 		if len(kwargs.keys()) > 0:
-			self.manager.call_service(self.swarm_prefix+service, drone_id=self.selected_drone, payload=objectview(kwargs))
+			res = self.manager.call_service(self.swarm_prefix+service, drone_id=self.selected_drone, payload=objectview(kwargs))
 		else:
-			self.manager.call_service(self.swarm_prefix+service, drone_id=self.selected_drone)
+			res = self.manager.call_service(self.swarm_prefix+service, drone_id=self.selected_drone)
+		print 'SERVICE RESULT :', res
+		return res
 
 	def _do_land(self):
 		if self.flying:

@@ -128,8 +128,6 @@ class ControlModeCircle(ControlMode):
 
 			self.call_service('trajectory_manager/trajectory/config_bool',
 				tid=1, key='loop', value=True)
-			self.call_service('trajectory_manager/trajectory/config_float',
-				tid=1, key='speed', value=0.5)
 
 			for p in circle_points:
 				self.call_service('trajectory_manager/trajectory/config_vector',

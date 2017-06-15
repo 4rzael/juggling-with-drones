@@ -49,6 +49,7 @@ class SwarmManager(object):
 
 		self.nb_drones = int(self.manager.rospy.get_param('~nb_drones', default='2'))
 		self.drones = self.manager.rospy.get_param('~drone_prefixes')[:self.nb_drones]
+		self.active_drones = []
 		bases = self.manager.rospy.get_param('~bases', [])
 		self.bases = [None] * len(self.drones)
 		try:
@@ -83,7 +84,7 @@ class SwarmManager(object):
 			'from_type': Proxy_Empty, 'to_type': Empty},
 			{'name': 'trajectory_manager/translate_trajectory',
 			'from_type': Proxy_TranslateTrajectory, 'to_type': TranslateTrajectory},
-			{'name': 'trajectory_manager/set_trajectory_translation8',
+			{'name': 'trajectory_manager/set_trajectory_translation',
 			'from_type': Proxy_TranslateTrajectory, 'to_type': TranslateTrajectory},
 			{'name': 'emergency',
 			'from_type': Proxy_Empty, 'to_type': Empty}
@@ -91,18 +92,29 @@ class SwarmManager(object):
 
 		self.proxies = {}
 
+		self._get_active_drones()
 		self._build_proxies()
 
 		print self.proxies
 
 		# self.manager.add_server_service('land_at_base', Proxy_Empty, self.srv_land_at_base)
 
+	def _get_active_drones(self):
+		self.active_drones = []
+		for idx, d in enumerate(self.drones):
+			try:
+				self.manager.rospy.wait_for_service(d+'/ready', timeout=10)
+				self.active_drones.append(idx)
+			except:
+				pass
+
 	def _add_client_service(self, s_name, s_type):
 		srvs = [None] * len(self.drones)
-		for drone_idx, drone in enumerate(self.drones):
+		for drone_idx in self.active_drones:
+			drone = self.drones[drone_idx]
+
 			serv_name = drone+'/'+s_name
 			try:
-				self.manager.rospy.wait_for_service(serv_name, timeout=2)
 				srvs[drone_idx] = self.manager.add_client_service(serv_name, s_type)
 
 			except self.manager.rospy.ROSException:
@@ -120,7 +132,7 @@ class SwarmManager(object):
 		def cb(req, res):
 			print 'PROXYING', proxy_object['to_type'], 'TO DRONE', req.drone_id
 
-			if req.drone_id not in range(len(self.drones)):
+			if req.drone_id not in self.active_drones:
 				print 'PROXY ERROR : DRONE NOT FOUND'
 				proxy_success = False
 			else:
@@ -133,13 +145,15 @@ class SwarmManager(object):
 				proxy_service = self.proxies[proxy_object['name']][req.drone_id]
 				if proxy_service is None:
 					proxy_success = False
+					print 'PROXY ERROR : PROXY NOT FOUND'
 				else:
 					proxied_res = proxy_service(proxied_req)
 					try:
 						result = proxied_res.result
 						proxy_success = True
-					except:
+					except Exception as e:
 						proxy_success = False
+						print 'PROXY ERROR :', e
 						pass
 
 			res.proxy_success = proxy_success

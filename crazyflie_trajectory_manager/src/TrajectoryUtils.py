@@ -1,6 +1,7 @@
 import math
 from geometry_msgs.msg import Pose, Vector3
 import time
+import numpy as np
 
 def millis():
 	return int(time.time() * 1000.0)
@@ -11,6 +12,12 @@ def tuple3_add(t1, t2):
 		t1[1] + t2[1],
 		t1[2] + t2[2]
 		)
+
+def normalize_nparray(v):
+    norm=np.linalg.norm(v)
+    if norm==0: 
+       return v
+    return v/norm
 
 # n-dimensionnal distance computation
 def distance(p0, p1):

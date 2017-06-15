@@ -14,9 +14,11 @@ class ControlModeBall(ControlMode):
 			speed = vec3_to_tuple(glove.velocity)
 			speed = [s * 2 for s in speed]
 			self.call_service('trajectory_manager/trajectory/config_vector',
+				tid=1, key='gravity', value=(0,0,-9.81))
+			self.call_service('trajectory_manager/trajectory/config_vector',
 				tid=1, key='init_speed', value=speed)
 			self.call_service('trajectory_manager/trajectory/config_float',
-				tid=1, key='time_multiplier', value=0.5)
+				tid=1, key='time_multiplier', value=0.4)
 			self.call_service('trajectory_manager/visualize',
 				tid=1)
 

@@ -15,7 +15,7 @@ class BSplineTimedTrajectory(BSplineTrajectory):
 		self['trajectory_time'] = trajectory_time
 		# the speed is the fallback for the trajectory_time.
 		# If no trajectory_time is given, it will be computed from the speed
-		self['speed'] = 0.5 # in m/s
+		self['speed'] = 0.35 # in m/s
 		self.last_point_time = 0
 		self.is_first_pos = True
 
