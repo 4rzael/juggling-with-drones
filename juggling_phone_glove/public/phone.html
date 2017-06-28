@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Glove controller</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+    <script
+    	src="https://code.jquery.com/jquery-3.2.1.slim.js"
+    	integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg="
+    	crossorigin="anonymous"></script>
+
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+    <script type="text/javascript" src="/libs/es6-promise.auto.min.js"></script>
+
+    <script type="text/javascript" src="/libs/gyronorm.complete.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bigbutton.css">
+
+    <link rel="stylesheet" type="text/css" href="css/midbutton.css">
+
+    <link rel="stylesheet" type="text/css" href="css/abortbutton.css">
+
+
+  </head>
+  <body>
+
+    <div class="container-fluid">
+    <input type="button" name="trajectory_type" id="abort_button" class="btn btn-default" value="abort" >
+	<div class="row">
+		<div class="col-md-12">
+			<h2>
+				Select controller id.
+			</h2>
+			<form name="controller_id">
+			    <input type="radio" name="controller_id" value="0" checked> 0
+			    <input type="radio" name="controller_id" value="1" > 1<br><br>
+			</form>	
+			<h2>
+				Select drone to control
+			</h2>
+			<form name="drone_id">
+			    <input type="radio" name="drone_id" value="0" checked> 0
+			    <input type="radio" name="drone_id" value="1" > 1
+			    <input type="radio" name="drone_id" value="2" > 2
+			    <input type="radio" name="drone_id" value="3" > 3
+			    <input type="radio" name="drone_id" value="4" > 4<br><br>
+			</form>	
+			<h2>
+				Select trajectory type.
+			</h2>
+			<div class="row">
+				<div class="col-xs-3">
+				    <input type="button" name="trajectory_type" id="traj0_button" value="0" >
+				</div>
+				<div class="col-xs-3">
+				    <input type="button" name="trajectory_type" id="traj1_button" value="1" >
+				</div>
+				<div class="col-xs-3">
+				    <input type="button" name="trajectory_type" id="traj2_button" value="2" >
+				</div>
+				<div class="col-xs-3">
+				    <input type="button" name="trajectory_type" id="traj3_button" value="3" >
+				</div>
+			</div>			
+		    <br><br>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			 
+			<button type="button" class="mid_button" id="start_stop_button">
+				POWER
+			</button>
+		</div>
+
+		<div class="col-xs-4">
+			 
+			<button type="button" class="big_button" id="big_button">
+				INTERACT
+			</button>
+		</div>
+
+		<div class="col-xs-4">
+			 
+			<button type="button" class="mid_button" id="slide_button">
+				SLIDE
+			</button>
+		</div>
+	</div>
+</div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="src/phone.js"></script>
+
+  </body>
+</html>

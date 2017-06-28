@@ -40,7 +40,8 @@ class Controller(object):
 		self.manager = PubSubManager('juggling_controller', anonymous=False, log_level=rospy.DEBUG)
 
 		self.nb_drones = int(self.manager.get_param('~nb_drones', 2))
-		self.selected_drone = min(int(self.manager.get_param('~controller_id', 0)), self.nb_drones - 1)
+		self.controller_id = int(self.manager.get_param('~controller_id', 0))
+		self.selected_drone = min(self.controller_id, self.nb_drones - 1)
 
 		self.manager.add_client_service(swarm_prefix+'trajectory_manager/load_trajectory',
 			Proxy_LoadTrajectory)
@@ -80,19 +81,23 @@ class Controller(object):
 	def _on_glove_input(self, input_wrapper):
 		glove = input_wrapper['data']
 
+		if glove.glove_id.data != self.controller_id:
+			return
+
 		# compute differences from buttons
 		button_diff = [int(_a) - int(_b) for _a,_b in zip(glove.buttons, self.last_input.buttons)]
 
 		buttons = {}
 
-		buttons['action_buttons'] = button_diff[1:5]
 		buttons['select_button'] = button_diff[0] # l/r 1
+		buttons['action_buttons'] = button_diff[1:5]
 		buttons['takeoff_land_button'] = button_diff[5] 
-		buttons['start_button'] = button_diff[7] # trigger
 		buttons['translate'] = button_diff[6] # l/r 3
-		buttons['emergency'] = button_diff[8] # joystick up
-		buttons['prev_drone'] = button_diff[9] # joystick left
-		buttons['next_drone'] = button_diff[10] # joystick right
+		buttons['emergency'] = button_diff[7] # joystick up
+		buttons['prev_drone'] = button_diff[8] # joystick left
+		buttons['next_drone'] = button_diff[9] # joystick right
+
+		print buttons
 
 		if buttons['prev_drone'] == 1:
 			self._prev_drone()
@@ -120,10 +125,6 @@ class Controller(object):
 				tid=1, trajectory_type=trajectory_selected.get_name())
 			self.current_trajectory = trajectory_selected(self)
 			print 'TRAJECTORY SELECTED :', self.current_trajectory.get_name()
-
-		# trajectory submitting and start
-		if buttons['start_button'] == 1:
-			self._next_trajectory()
 
 		if buttons['translate'] == -1:
 			vel = vec3_to_tuple(glove.velocity)

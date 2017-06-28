@@ -9,8 +9,10 @@ class ControlModeBTimed(ControlModeBSpline):
 		return 'btimed'
 
 	def on_input(self, glove, buttons_diff):
+		if buttons_diff['select_button'] == -1:
+			self.send()
+
 		if buttons_diff['select_button'] == 1:
 			self.call_service('trajectory_manager/trajectory/config_float',
 				tid=1, key='speed', value=0.5)
 		super(ControlModeBTimed, self).on_input(glove, buttons_diff)
-

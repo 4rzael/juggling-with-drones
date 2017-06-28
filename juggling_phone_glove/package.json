@@ -1,0 +1,25 @@
+{
+  "name": "gyro-io",
+  "version": "2.1.0",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": "4.4.4"
+  },
+  "dependencies": {
+    "ansi-color-stream": "^1.0.0",
+    "express": "^4.13.4",
+    "express-device": "^0.4.2",
+    "microseconds": "^0.1.0",
+    "minimist": "^1.2.0",
+    "nodemon": "^1.9.2",
+    "socket.io": "^1.4.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node run.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "4rzael",
+  "license": "MIT"
+}

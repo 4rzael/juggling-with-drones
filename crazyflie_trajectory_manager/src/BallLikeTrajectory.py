@@ -10,7 +10,7 @@ import numpy as np
 
 class BallLikeTrajectory(Trajectory):
 	def __init__(self, init_speed=(0.0,0.0,0.0), init_pos=None,
-		time_multiplier=0.75, **kwargs):
+		time_multiplier=0.5, **kwargs):
 
 		super(BallLikeTrajectory, self).__init__(**kwargs)
 

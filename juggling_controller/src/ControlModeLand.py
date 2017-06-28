@@ -16,3 +16,6 @@ class ControlModeLand(ControlMode):
 				tid=1, key='position', value=pt)
 			self.call_service('trajectory_manager/visualize',
 				tid=1)
+
+		if buttons_diff['select_button'] == -1:
+			self.send()

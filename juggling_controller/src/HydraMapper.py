@@ -4,7 +4,7 @@ from visualization_msgs.msg import Marker
 from PubSubManager import *
 from razer_hydra.msg import Hydra
 from geometry_msgs.msg import Vector3, Quaternion
-from std_msgs.msg import ColorRGBA
+from std_msgs.msg import ColorRGBA, Int32
 from geometry_msgs.msg import PoseStamped
 import std_msgs.msg
 import numpy as np
@@ -90,11 +90,18 @@ class HydraMapper(object):
 
 	def create_glove(self, position, rotation, velocity, acceleration, buttons, trigger, joy):
 		glove = GloveInput()
+		glove.glove_id = Int32(self.INPUT_ID)
 		glove.position = Vector3(*position)
 		glove.velocity = Vector3(*velocity)
 		glove.acceleration = Vector3(*acceleration)
 		glove.rotation = Quaternion(*rotation)
-		glove.buttons = buttons + [trigger > 0.5] + [joy[1] > 0.75] + [joy[0] < -0.75] + [joy[0] > 0.75]
+		glove.buttons = (
+			buttons +
+			# [trigger > 0.5] +
+			[joy[1] > 0.75] +
+			[joy[0] < -0.75] +
+			[joy[0] > 0.75]
+			)
 		return glove
 
 	def onHydra(self, hydra_wrapper):

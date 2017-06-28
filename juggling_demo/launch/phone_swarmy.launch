@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="nb_drones" default="2"/>
+
+  <!-- Drone radio uris. Default to hex "it's dead" plus the drone number -->
+  <arg name="uri_0" default="radio://0/80/2M/175DEAD0"/>
+  <arg name="uri_1" default="radio://0/80/2M/175DEAD1"/>
+  <arg name="uri_2" default="radio://0/80/2M/175DEAD2"/>
+  <arg name="uri_3" default="radio://0/80/2M/175DEAD3"/>
+  <arg name="uri_4" default="radio://0/80/2M/175DEAD4"/>
+
+  <arg name="controller_uri" default="radio://0/80/2M/175DEADC"/>
+
+
+  <arg name="namespace_input_manager_0" default="input_manager_0"/>
+  <arg name="namespace_input_manager_1" default="input_manager_1"/>
+
+  <arg name="namespace_swarm" default="swarmy"/>
+
+  <arg name="namespace_crazyflie_0" default="crazyflie_0"/>
+  <arg name="namespace_crazyflie_1" default="crazyflie_1"/>
+  <arg name="namespace_crazyflie_2" default="crazyflie_2"/>
+  <arg name="namespace_crazyflie_3" default="crazyflie_3"/>
+  <arg name="namespace_crazyflie_4" default="crazyflie_4"/>
+
+  <arg name="frame" default="base_link" />
+
+  <rosparam command="load" file="$(find juggling_demo)/data/anchor_pos.yaml" />
+
+  <!-- VISUALISATION STUFF -->
+
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find crazyflie_description)/urdf/crazyflie2.urdf.xacro" />
+
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find juggling_demo)/data/razer_swarmy.rviz"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster"
+        args="1 0 0 0 0 0 1 world lps 100" />
+
+  <!-- RAZER HYDRA HANDLER -->
+
+
+  <!-- INPUT MANAGERS -->
+
+  <include file="$(find juggling_phone_glove)/launch/phone.launch">
+    <arg name="namespace_input_manager" value="$(arg namespace_input_manager_0)"/>
+    <arg name="drone_uri" value="$(arg controller_uri)"/>
+    <arg name="nb_drones" value="$(arg nb_drones)"/>
+    <arg name="controller_id" value="0"/>
+  </include>
+
+  <!-- SWARM MANAGER -->
+
+    <node pkg="juggling_swarm_manager" type="SwarmManager.py" name="swarm_manager">
+      <rosparam param="drone_prefixes" subst_value="True"> [$(arg namespace_crazyflie_0), $(arg namespace_crazyflie_1), $(arg namespace_crazyflie_2), $(arg namespace_crazyflie_3), $(arg namespace_crazyflie_4)] </rosparam>
+      <param name="nb_drones" value="$(arg nb_drones)"/>
+    </node>
+
+  <!-- DRONES -->
+
+  <include file="$(find crazyflie_trajectory_manager)/launch/one_drone.launch">
+    <arg name="namespace_crazyflie" value="$(arg namespace_crazyflie_0)"/>
+    <arg name="uri" value="$(arg uri_0)"/>
+  </include>
+
+  <include file="$(find crazyflie_trajectory_manager)/launch/one_drone.launch">
+    <arg name="namespace_crazyflie" value="$(arg namespace_crazyflie_1)"/>
+    <arg name="uri" value="$(arg uri_1)"/>
+  </include>
+
+  <include file="$(find crazyflie_trajectory_manager)/launch/one_drone.launch">
+    <arg name="namespace_crazyflie" value="$(arg namespace_crazyflie_2)"/>
+    <arg name="uri" value="$(arg uri_2)"/>
+  </include>
+
+  <include file="$(find crazyflie_trajectory_manager)/launch/one_drone.launch">
+    <arg name="namespace_crazyflie" value="$(arg namespace_crazyflie_3)"/>
+    <arg name="uri" value="$(arg uri_3)"/>
+  </include>
+
+    <include file="$(find crazyflie_trajectory_manager)/launch/one_drone.launch">
+    <arg name="namespace_crazyflie" value="$(arg namespace_crazyflie_4)"/>
+    <arg name="uri" value="$(arg uri_4)"/>
+  </include>
+
+  <include file="$(find crazyflie_driver)/launch/crazyflie_server.launch" />
+</launch>

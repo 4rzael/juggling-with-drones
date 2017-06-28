@@ -11,7 +11,7 @@ class TopicException(Exception):
     pass
 
 class PubSubManager():
-	def __init__(self, node_name, anonymous=True):
+	def __init__(self, node_name, anonymous=True, **kwargs):
 		self.subscribers = {} # topic => rospy.Subscriber
 		self.publishers = {} # topic => rospy.Publisher
 		self.server_services = {} # name => rospy.Service
@@ -22,7 +22,9 @@ class PubSubManager():
 
 		self.rospy = rospy
 
-		rospy.init_node(node_name, anonymous=anonymous)
+		self.name = node_name
+
+		rospy.init_node(node_name, anonymous=anonymous, **kwargs)
 
 
 	def add_subscriber(self, topic, message_type, callback=None):
@@ -93,6 +95,12 @@ class PubSubManager():
 
 	def call_service(self, name, *args, **kwargs):
 		return self.client_services[name](*args, **kwargs)
+
+	def get_param(self, param_name, default_value=None):
+		if default_value is None:
+			return self.rospy.get_param(param_name)
+		else:
+			return self.rospy.get_param(param_name, default_value)
 
 
 if __name__ == '__main__':

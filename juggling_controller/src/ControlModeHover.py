@@ -9,6 +9,9 @@ class ControlModeHover(ControlMode):
 		return 'hover'
 
 	def on_input(self, glove, buttons_diff):
+		if buttons_diff['select_button'] == -1:
+			self.send()
+
 		if buttons_diff['select_button'] == 1:
 			hover_point = vec3_to_tuple(glove.position)
 			self.call_service('trajectory_manager/trajectory/config_vector',

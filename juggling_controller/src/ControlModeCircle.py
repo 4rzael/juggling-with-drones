@@ -137,6 +137,7 @@ class ControlModeCircle(ControlMode):
 				tid=1)
 
 			self.points = []
+			self.send()
 
 
 		if self.recording:

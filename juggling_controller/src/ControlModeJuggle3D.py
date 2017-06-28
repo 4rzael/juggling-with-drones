@@ -33,4 +33,4 @@ class ControlModeJuggle3D(ControlMode):
 				tid=1, key='init_speed', value=speed)
 			self.call_service('trajectory_manager/visualize',
 				tid=1)
-			self.controller._next_trajectory()
+			self.send()

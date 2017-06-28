@@ -22,3 +22,4 @@ class ControlModeBall(ControlMode):
 			self.call_service('trajectory_manager/visualize',
 				tid=1)
 
+			self.send()
